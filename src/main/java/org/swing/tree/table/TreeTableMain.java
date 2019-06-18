@@ -93,7 +93,7 @@ public class TreeTableMain extends JFrame {
 		rootNodes.add(new MyDataNode("line6", "values", "", children1));
 		rootNodes.add(new MyDataNode("line7", "values", "", children1));
 
-		MyDataNode root = new MyDataNode("root", "", "", rootNodes);
+		MyDataNode root = new MyDataNode(" root", "", "", rootNodes);
 		return root;
 	}
 

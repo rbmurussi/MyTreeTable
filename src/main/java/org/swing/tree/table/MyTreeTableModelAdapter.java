@@ -50,7 +50,7 @@ public class MyTreeTableModelAdapter extends AbstractTableModel {
 	}
 
 	public boolean isCellEditable(int row, int column) {
-		return treeTableModel.isCellEditable(nodeForRow(row), column);
+		return column > 0 ? false : treeTableModel.isCellEditable(nodeForRow(row), column);
 	}
 
 	public void setValueAt(Object value, int row, int column) {
