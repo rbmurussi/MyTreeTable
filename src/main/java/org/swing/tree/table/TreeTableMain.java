@@ -11,14 +11,14 @@ public class TreeTableMain extends JFrame {
 
 	private MyAbstractTreeTableModel treeTableModel;
 
-	public TreeTableMain() {
+	public TreeTableMain(MyDataNode myDataNode) {
 		super("Tree Table Demo");
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setLayout(new GridLayout(0, 1));
 
-		treeTableModel = new MyDataModel(createDataStructure());
+		treeTableModel = new MyDataModel(myDataNode);
 
 		MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
 		//setLayout(new BorderLayout());
@@ -36,7 +36,7 @@ public class TreeTableMain extends JFrame {
 		setSize(800, 600);
 	}
 
-	private String get(String name, Object obj) {
+	private static String get(String name, Object obj) {
 		try {
 			name = name.substring(0,1).toUpperCase().concat(name.substring(1));
 			Method method = obj.getClass().getMethod("get" + name);
@@ -47,8 +47,8 @@ public class TreeTableMain extends JFrame {
 		}
 	}
 
-	private List<MyDataNode> parseMyDataNode(Object obj) {
-		List<MyDataNode> listMyDataNode = new ArrayList<>();
+	private static List<MyDataNode> parseMyDataNode(Object obj) {
+		List<MyDataNode> listMyDataNode = new ArrayList<MyDataNode>();
 		List<Field> listField = defFields(obj.getClass());
 		for (Field field: listField) {
 			String value = get(field.getName(), obj);
@@ -58,8 +58,8 @@ public class TreeTableMain extends JFrame {
 		return listMyDataNode;
 	}
 
-	private List<Field> defFields(Class<?> tClass) {
-		List<Field> list = new ArrayList<>();;
+	private static List<Field> defFields(Class<?> tClass) {
+		List<Field> list = new ArrayList<Field>();
 		if(!tClass.equals(Object.class)) {
 			list = defFields(tClass.getSuperclass());
 		}
@@ -70,8 +70,8 @@ public class TreeTableMain extends JFrame {
 		return list;
 	}
 
-	private MyDataNode create(List<Object> listObject) {
-		List<MyDataNode> rootNodes = new ArrayList<>();
+	private static MyDataNode load(List<Object> listObject) {
+		List<MyDataNode> rootNodes = new ArrayList<MyDataNode>();
 		for(Object object: listObject) {
 			List<MyDataNode> children = parseMyDataNode(object);
 			rootNodes.add(new MyDataNode(object.getClass().getName(), object.toString(), "", children));
@@ -81,13 +81,13 @@ public class TreeTableMain extends JFrame {
 	}
 
 	private static MyDataNode createDataStructure() {
-		List<MyDataNode> children1 = new ArrayList<>();
+		List<MyDataNode> children1 = new ArrayList<MyDataNode>();
 		children1.add(new MyDataNode("field1", "value1", "comment1", null));
 		children1.add(new MyDataNode("field2", "value2", "comment2", null));
 		children1.add(new MyDataNode("field3", "value3", "comment3", null));
 		children1.add(new MyDataNode("field4", "value4", "comment4", null));
 
-		List<MyDataNode> rootNodes = new ArrayList<>();
+		List<MyDataNode> rootNodes = new ArrayList<MyDataNode>();
 		rootNodes.add(new MyDataNode("line1", "values", "", children1));
 		rootNodes.add(new MyDataNode("line2", "values", "", children1));
 		rootNodes.add(new MyDataNode("line3", "values", "", children1));
@@ -106,6 +106,6 @@ public class TreeTableMain extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		new TreeTableMain().setVisible(true);
+		new TreeTableMain(createDataStructure()).setVisible(true);
 	}
 }
