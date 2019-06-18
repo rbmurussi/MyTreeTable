@@ -2,6 +2,8 @@ package org.swing.tree.table;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -9,16 +11,12 @@ import java.util.List;
 
 public class TreeTableMain extends JFrame {
 
-	public TreeTableMain(MyDataNode myDataNode) {
+	public TreeTableMain() {
 		super("Tree Table Demo");
 
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setLayout(new GridLayout(0, 1));
-
-		MyAbstractTreeTableModel treeTableModel = new MyDataModel(myDataNode);
-
-		MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
 
 		JMenuBar jMenuBar = new JMenuBar();
 		setJMenuBar(jMenuBar);
@@ -26,11 +24,22 @@ public class TreeTableMain extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		jMenuBar.add(fileMenu);
 		JMenuItem openAction = new JMenuItem("Open");
+		openAction.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				init();
+			}
+		});
 		fileMenu.add(openAction);
 
-		add(new JScrollPane(myTreeTable));
-
 		setSize(800, 600);
+	}
+
+	private void init() {
+		MyAbstractTreeTableModel treeTableModel = new MyDataModel(createDataStructure());
+		MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
+		add(new JScrollPane(myTreeTable));
+		pack();
 	}
 
 	private static String get(String name, Object obj) {
@@ -103,6 +112,6 @@ public class TreeTableMain extends JFrame {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		new TreeTableMain(createDataStructure()).setVisible(true);
+		new TreeTableMain().setVisible(true);
 	}
 }
