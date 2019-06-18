@@ -13,7 +13,6 @@ public class MyTreeTableModelAdapter extends AbstractTableModel {
 
 	public MyTreeTableModelAdapter(MyAbstractTreeTableModel treeTableModel, JTree tree) {
 		this.tree = tree;
-		tree.setRootVisible(false);
 		this.treeTableModel = treeTableModel;
 		tree.addTreeExpansionListener(new TreeExpansionListener() {
 			public void treeExpanded(TreeExpansionEvent event) {

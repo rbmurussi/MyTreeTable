@@ -9,8 +9,6 @@ import java.util.List;
 
 public class TreeTableMain extends JFrame {
 
-	private MyAbstractTreeTableModel treeTableModel;
-
 	public TreeTableMain(MyDataNode myDataNode) {
 		super("Tree Table Demo");
 
@@ -18,10 +16,9 @@ public class TreeTableMain extends JFrame {
 
 		setLayout(new GridLayout(0, 1));
 
-		treeTableModel = new MyDataModel(myDataNode);
+		MyAbstractTreeTableModel treeTableModel = new MyDataModel(myDataNode);
 
 		MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
-		//setLayout(new BorderLayout());
 
 		JMenuBar jMenuBar = new JMenuBar();
 		setJMenuBar(jMenuBar);

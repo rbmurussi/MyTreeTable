@@ -17,8 +17,8 @@ public class MyTreeTable extends JTable {
 		MyTreeTableSelectionModel selectionModel = new MyTreeTableSelectionModel();
 		tree.setSelectionModel(selectionModel);
 		DefaultTreeCellRenderer treeCellRenderer = new DefaultTreeCellRenderer();
-		treeCellRenderer.setOpenIcon(treeCellRenderer.getLeafIcon());
-		treeCellRenderer.setClosedIcon(treeCellRenderer.getLeafIcon());
+		treeCellRenderer.setOpenIcon(null);
+		treeCellRenderer.setClosedIcon(null);
 		treeCellRenderer.setLeafIcon(null);
 		tree.setCellRenderer(treeCellRenderer);
 		setSelectionModel(selectionModel.getListSelectionModel());
