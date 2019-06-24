@@ -1,12 +1,17 @@
 package org.swing.tree.table;
 
+import org.clearingio.ipm.MsgIpm;
+import org.clearingio.ipm.file.RdwDataInputStream;
+import org.clearingio.iso8583.annotation.enumeration.Encode;
+import org.clearingio.iso8583.builder.MsgBuilder;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class TreeTableMain extends JFrame {
@@ -23,23 +28,46 @@ public class TreeTableMain extends JFrame {
 
 		JMenu fileMenu = new JMenu("File");
 		jMenuBar.add(fileMenu);
-		JMenuItem openAction = new JMenuItem("Open");
-		openAction.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				init();
-			}
-		});
+		JMenuItem openAction = new JMenuItem("Open ISO-8583");
+		openAction.addActionListener((e) -> openISO8583());
 		fileMenu.add(openAction);
 
 		setSize(800, 600);
 	}
 
-	private void init() {
-		MyAbstractTreeTableModel treeTableModel = new MyDataModel(createDataStructure());
+	private void openISO8583() {
+		JFileChooser jFileChooser = new JFileChooser();
+		jFileChooser.showOpenDialog(this);
+		File file = jFileChooser.getSelectedFile();
+		System.out.println(file.getAbsolutePath());
+
+		List<Object> list = new ArrayList<>();
+
+		try(RdwDataInputStream in = new RdwDataInputStream(new FileInputStream(file))) {
+			MsgBuilder<MsgIpm> msgBuilder = new MsgBuilder<>(MsgIpm.class, Encode.EBCDIC);
+			while(in.hasNext()) {
+				list.add(msgBuilder.unpack(in.next()));
+			}
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, e.getMessage(), parseException(e), JOptionPane.ERROR_MESSAGE);
+		}
+
+		MyDataNode myDataNode = load(list.iterator(), file.getAbsolutePath());
+		MyAbstractTreeTableModel treeTableModel = new MyDataModel(myDataNode);
 		MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
 		add(new JScrollPane(myTreeTable));
 		pack();
+
+		repaint();
+	}
+
+	private String parseException(Exception e) {
+		StackTraceElement st[] = e.getStackTrace();
+		String err = "";
+		for(int i = 0; i < st.length; i++){
+			err += st[i].toString() + '\n';
+		}
+		return err;
 	}
 
 	private static String get(String name, Object obj) {
@@ -76,13 +104,14 @@ public class TreeTableMain extends JFrame {
 		return list;
 	}
 
-	private static MyDataNode load(List<Object> listObject) {
+	private static MyDataNode load(Iterator<Object> itObject, String fileName) {
 		List<MyDataNode> rootNodes = new ArrayList<MyDataNode>();
-		for(Object object: listObject) {
+		while(itObject.hasNext()) {
+			Object object = itObject.next();
 			List<MyDataNode> children = parseMyDataNode(object);
 			rootNodes.add(new MyDataNode(object.getClass().getName(), object.toString(), "", children));
 		}
-		MyDataNode root = new MyDataNode("", "", "", rootNodes);
+		MyDataNode root = new MyDataNode(fileName, "", "", rootNodes);
 		return root;
 	}
 
