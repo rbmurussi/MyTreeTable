@@ -49,7 +49,7 @@ public class TreeTableMain extends JFrame {
 				list.add(msgBuilder.unpack(in.next()));
 			}
 		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage(), parseException(e), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, parseException(e), e.getMessage(), JOptionPane.ERROR_MESSAGE);
 		}
 
 		MyDataNode myDataNode = load(list.iterator(), file.getAbsolutePath());
@@ -57,8 +57,6 @@ public class TreeTableMain extends JFrame {
 		MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
 		add(new JScrollPane(myTreeTable));
 		pack();
-
-		repaint();
 	}
 
 	private String parseException(Exception e) {
@@ -86,6 +84,7 @@ public class TreeTableMain extends JFrame {
 		List<Field> listField = defFields(obj.getClass());
 		for (Field field: listField) {
 			String value = get(field.getName(), obj);
+			if(value == null || value.isEmpty()) continue;
 			String description = "";
 			listMyDataNode.add(new MyDataNode(field.getName(), value, description, null));
 		}
