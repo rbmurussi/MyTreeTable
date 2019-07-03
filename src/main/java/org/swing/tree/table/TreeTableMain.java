@@ -1,7 +1,10 @@
 package org.swing.tree.table;
 
+import org.beanio.annotation.Record;
+import org.clearingio.file.StreamFactoryClearingIO;
 import org.clearingio.ipm.MsgIpm;
 import org.clearingio.ipm.file.RdwDataInputStream;
+import org.clearingio.iso8583.annotation.Bit;
 import org.clearingio.iso8583.annotation.enumeration.Encode;
 import org.clearingio.iso8583.builder.MsgBuilder;
 
@@ -28,11 +31,34 @@ public class TreeTableMain extends JFrame {
 
 		JMenu fileMenu = new JMenu("File");
 		jMenuBar.add(fileMenu);
-		JMenuItem openAction = new JMenuItem("Open ISO-8583");
-		openAction.addActionListener((e) -> openISO8583());
-		fileMenu.add(openAction);
+
+		JMenuItem jMenuItemOpenISO8583 = new JMenuItem("Open ISO-8583");
+		jMenuItemOpenISO8583.addActionListener((e) -> openISO8583());
+		fileMenu.add(jMenuItemOpenISO8583);
+
+		JMenuItem jMenuItemOpenIncomingELO = new JMenuItem("Open Incoming ELO");
+		jMenuItemOpenIncomingELO.addActionListener((e) -> incomingELO(this));
+		fileMenu.add(jMenuItemOpenIncomingELO);
 
 		setSize(800, 600);
+	}
+
+	private void incomingELO(TreeTableMain treeTableMain) {
+		try {
+			JFileChooser jFileChooser = new JFileChooser();
+			jFileChooser.showOpenDialog(treeTableMain);
+			File file = jFileChooser.getSelectedFile();
+			System.out.println(file.getAbsolutePath());
+			StreamFactoryClearingIO streamFactoryClearingIO = new StreamFactoryClearingIO();
+			List<Object> list = streamFactoryClearingIO.createReader("IncomingELO", file);
+			MyDataNode myDataNode = load(list.iterator(), file.getAbsolutePath());
+			MyAbstractTreeTableModel treeTableModel = new MyDataModel(myDataNode);
+			MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
+			treeTableMain.add(new JScrollPane(myTreeTable));
+			treeTableMain.pack();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(treeTableMain, treeTableMain.parseException(e), e.getMessage(), JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	private void openISO8583() {
@@ -84,8 +110,12 @@ public class TreeTableMain extends JFrame {
 		List<Field> listField = defFields(obj.getClass());
 		for (Field field: listField) {
 			String value = get(field.getName(), obj);
-			if(value == null || value.isEmpty()) continue;
+			if(value == null) continue;
 			String description = "";
+			if(field.isAnnotationPresent(org.beanio.annotation.Field.class))
+				description = field.getAnnotation(org.beanio.annotation.Field.class).name();
+			if(field.isAnnotationPresent(Bit.class))
+				description = field.getAnnotation(Bit.class).name();
 			listMyDataNode.add(new MyDataNode(field.getName(), value, description, null));
 		}
 		return listMyDataNode;
@@ -105,10 +135,15 @@ public class TreeTableMain extends JFrame {
 
 	private static MyDataNode load(Iterator<Object> itObject, String fileName) {
 		List<MyDataNode> rootNodes = new ArrayList<MyDataNode>();
+		int i = 1;
 		while(itObject.hasNext()) {
 			Object object = itObject.next();
 			List<MyDataNode> children = parseMyDataNode(object);
-			rootNodes.add(new MyDataNode(object.getClass().getName(), object.toString(), "", children));
+			String description = "";
+			if(object.getClass().isAnnotationPresent(Record.class))
+				description = object.getClass().getAnnotation(Record.class).name();
+			rootNodes.add(new MyDataNode(object.getClass().getSimpleName(), object.toString(), description, children));
+			i++;
 		}
 		MyDataNode root = new MyDataNode(fileName, "", "", rootNodes);
 		return root;
