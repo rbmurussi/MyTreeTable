@@ -19,6 +19,8 @@ import java.util.List;
 
 public class TreeTableMain extends JFrame {
 
+	private StreamFactoryClearingIO streamFactoryClearingIO = new StreamFactoryClearingIO();
+
 	public TreeTableMain() {
 		super("Tree Table Demo");
 
@@ -40,22 +42,49 @@ public class TreeTableMain extends JFrame {
 		jMenuItemOpenIncomingELO.addActionListener((e) -> incomingELO(this));
 		fileMenu.add(jMenuItemOpenIncomingELO);
 
+		JMenuItem jMenuItemOpenIncomingVisa = new JMenuItem("Open Incoming VISA");
+		jMenuItemOpenIncomingVisa.addActionListener((e) -> incomingVISA(this));
+		fileMenu.add(jMenuItemOpenIncomingVisa);
+
+		JMenuItem jMenuItemOpenOutgoingVisa = new JMenuItem("Open Outgoing VISA");
+		jMenuItemOpenOutgoingVisa.addActionListener((e) -> outgoingVISA(this));
+		fileMenu.add(jMenuItemOpenOutgoingVisa);
+
 		setSize(800, 600);
+	}
+
+	private void outgoingVISA(TreeTableMain treeTableMain) {
+		try {
+			selectFileGetList(treeTableMain, "OutgoingVisa");
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(treeTableMain, treeTableMain.parseException(e), e.getMessage(), JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private void selectFileGetList(TreeTableMain treeTableMain, String outgoingVisa) {
+		JFileChooser jFileChooser = new JFileChooser();
+		jFileChooser.showOpenDialog(treeTableMain);
+		File file = jFileChooser.getSelectedFile();
+		System.out.println(file.getAbsolutePath());
+		List<Object> list = streamFactoryClearingIO.createReader(outgoingVisa, file);
+		MyDataNode myDataNode = load(list.iterator(), file.getAbsolutePath());
+		MyAbstractTreeTableModel treeTableModel = new MyDataModel(myDataNode);
+		MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
+		treeTableMain.add(new JScrollPane(myTreeTable));
+		treeTableMain.pack();
+	}
+
+	private void incomingVISA(TreeTableMain treeTableMain) {
+		try {
+			selectFileGetList(treeTableMain, "IncomingVisa");
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(treeTableMain, treeTableMain.parseException(e), e.getMessage(), JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	private void incomingELO(TreeTableMain treeTableMain) {
 		try {
-			JFileChooser jFileChooser = new JFileChooser();
-			jFileChooser.showOpenDialog(treeTableMain);
-			File file = jFileChooser.getSelectedFile();
-			System.out.println(file.getAbsolutePath());
-			StreamFactoryClearingIO streamFactoryClearingIO = new StreamFactoryClearingIO();
-			List<Object> list = streamFactoryClearingIO.createReader("IncomingELO", file);
-			MyDataNode myDataNode = load(list.iterator(), file.getAbsolutePath());
-			MyAbstractTreeTableModel treeTableModel = new MyDataModel(myDataNode);
-			MyTreeTable myTreeTable = new MyTreeTable(treeTableModel);
-			treeTableMain.add(new JScrollPane(myTreeTable));
-			treeTableMain.pack();
+			selectFileGetList(treeTableMain, "IncomingELO");
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(treeTableMain, treeTableMain.parseException(e), e.getMessage(), JOptionPane.ERROR_MESSAGE);
 		}
